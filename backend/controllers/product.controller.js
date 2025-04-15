@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Product from "../models/product.model.js";
 
 export const createProduct = async(req,res)=>{
@@ -31,7 +32,7 @@ export const updateProduct = async(req,res)=>{
 
     const productId = req.params.productId;
 
-    const {name,price,description} = req.body;
+    const {name,price,image,description} = req.body;
 
    try {
      const existingProduct = await Product.findById(productId);
@@ -40,10 +41,10 @@ export const updateProduct = async(req,res)=>{
          return res.status(404).json("product not found")
      }
   
-     existingProduct.name = name;
-     existingProduct.description=description;
-     existingProduct.price=price;
-     existingProduct.image;
+     existingProduct.name = name || existingProduct.name;
+    existingProduct.description = description || existingProduct.description;
+    existingProduct.price = price || existingProduct.price;
+    existingProduct.image = image || existingProduct.image;
 
      await existingProduct.save();
 
@@ -58,6 +59,10 @@ export const updateProduct = async(req,res)=>{
 
 export const deleteProduct = async (req, res) => {
     const productId = req.params.productId;
+
+    if(!mongoose.Types.ObjectId.isValid(productId)){
+      return res.status(404).json({success:false,message:"invalid product id"});
+    }
   
     try {
       const deletedProduct = await Product.findByIdAndDelete(productId);
@@ -91,9 +96,14 @@ export const allProducts = async(req,res)=>{
     try {
         const allProduct = await Product.find();
 
-        if(!allProduct){
-            return res.status(404).json("no product found");
+        if (allProduct.length === 0) {
+          return res.status(404).json({
+            success: false,
+            message: "No products found"
+          });
         }
+    
+
         return res.status(200).json({message:"all products found",data:allProduct});
     } catch (error) {
         return res.status(500).json("Internal server error");
