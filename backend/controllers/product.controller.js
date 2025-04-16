@@ -9,6 +9,7 @@ export const createProduct = async(req,res)=>{
         return res.status(400).json({success:false,message:"all fields are required"});
     }
 
+
     try {
         const product = await Product.create({
             name,
@@ -16,11 +17,13 @@ export const createProduct = async(req,res)=>{
             price,
             image
         })
-     await  product.save();
+   
 
 
-      return res.status(200).json({success:true,message:"Product created Successfully",product});
+      return res.status(200).json({success:true,message:"Product created Successfully",data:product});
     } catch (error) {
+      console.log("ERROR IN CREATE-PRODUCT CONTROLLER",error);
+      
         return res.status(500).json({success:false,message:"internal server error"});
     }
 
@@ -48,7 +51,7 @@ export const updateProduct = async(req,res)=>{
 
      await existingProduct.save();
 
-     return res.status(200).json("product updated successfully",existingProduct);
+     return res.status(200).json({success:true,message:"product updated successfully",data:existingProduct});
  
    } catch (error) {
     return res.status(500).json("Internal server error");
